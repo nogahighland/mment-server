@@ -19,7 +19,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 
-@ServerEndpoint(value="/")
+@ServerEndpoint(value="/ws")
 public class Endpoint {
 
 	public static Predicate<ITunesTrack> distinctTrack() {
@@ -60,7 +60,13 @@ public class Endpoint {
 			ArtworkSearcher searcher = injector.getInstance(ArtworkSearcher.class);
 			searcher.param("media", "music");
 			searcher.param("country", cc);
-			searcher.param("term", Joiner.on(' ').join(Arrays.asList(album, artist, title)));
+
+			String alteredAlbumName = album.replaceAll("\\[.+\\]", "").trim();
+			if (!alteredAlbumName.equals(album)) {
+				System.out.println(String.format("%s -> %s", album, alteredAlbumName));
+			}
+			String query = Joiner.on(' ').join(Arrays.asList(alteredAlbumName, artist, title));
+			searcher.param("term", query);
 
 			ITunesSearchResult result = searcher.search(ITunesSearchResult.class);
 			return result;
@@ -73,11 +79,14 @@ public class Endpoint {
 				.filter(distinctTrack())
 				.collect(Collectors.toList());
 
+		tracks.stream().map(track -> {
+			return Joiner.on(':').join(Arrays.asList(track.getArtistName(), track.getTrackName(), track.getCollectionName()));
+		}).forEach(System.out::println);
+
 		//TODO best hitの抽出
 		//TODO subscriberに合った形式に変換
 		//TODO redisへ登録 → publish
 
-		System.out.println(results);
 	}
 
 	@OnOpen
