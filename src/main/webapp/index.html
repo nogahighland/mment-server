@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+	<h1>mment running!</h1>
+	<script type="text/javascript">
+        var webSocket = new WebSocket('ws://' + location.host + location.pathname + '/ws');
+        webSocket.onopen = function(){
+        	console.log('open');
+        };
+        webSocket.onmessage = function() {
+        	console.log(arguments);
+        };
+        webSocket.onclose = function(){
+        	console.log('close');
+        };
+        webSocket.onerror = function() {
+        	console.log('error');
+        };
+	</script>
+</body>
+</html>
